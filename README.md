@@ -1,9 +1,8 @@
 ## take_a_break_remake: A beach sunset simulation
 
-I have long enjoyed "Homestar Runner" (http://www.homestarrunner.com), which is a website of funny, wholesome cartoons and skits made in Macromedia Flash.
+I have long enjoyed "Homestar Runner" (http://www.homestarrunner.com), a website of comedic cartoons made in Macromedia Flash.
 
-
-One time, a character decides to relieve his stress by watching a simulated beach sunset on his computer, complete with waves and seagulls, but all of his technology is outdated, so it is pixellated as if it were created in the early 1980s.  I enjoyed the idea and would have liked to see a modern, more realistic version.  Since learning to program, I decided to try it myself.  All credit for the idea goes to Homestar Runner and its creators.  File ["homestarrunner_original.png"](homestarrunner_original.png) is a screenshot of the original.
+One time, a character watches a simulated beach sunset, complete with waves and seagulls, on his early 1980s computer.  [(screenshot of the original)](homestarrunner_original.png)  I enjoyed the idea and would have liked to see a modern, less pixellated version.  Since learning to program, I decided to try it myself.  All credit for the idea goes to Homestar Runner and its creators.
 
 The original link can be found here: http://www.homestarrunner.com/take-a-break.exe
 
@@ -13,8 +12,11 @@ The original link can be found here: http://www.homestarrunner.com/take-a-break.
 - [Output image](output_170219.png)
 
 ####Upcoming changes:
+- Clouds
+- Adjustability (amount of clouds, height of sun, amount of water waves, wind)
+- Color response to height of sun
 - Reflection of the sun on the water
-- Animated clouds
+- Animation of clouds
 - Animated waves
 - Animated objects (ships, birds, sailboats)
 - Sound effects of water and maybe wind
