@@ -7,26 +7,38 @@ One time, a character watches a simulated beach sunset, complete with waves and 
 The original link can be found here: http://www.homestarrunner.com/take-a-break.exe
 
 ####Current features (2-19-17):
-- Show gradient sky, water, and sand colors, as well as a setting sun.
-- At this point, it doesn't do much and doesn't even have a reflection of the sun, but it looks nice and is my first try programming any sort of graphics.  I threw it together in a couple hours.
+- Sunset simulation using gradients to depict sky, water, and sand; also has a sun and clouds.
+- Cloud size and location is randomized.  Clouds near horizon are darker.
+- Slider controls can set height of sun above horizon, as well as number of clouds present.
+- Background colors (sky/water/sand) will change depending on height of sun.
 - [Output image](output_170219.png)
 
 ####Upcoming changes:
-- Clouds
-- Adjustability (amount of clouds, height of sun, amount of water waves, wind)
-- Color response to height of sun
-- Reflection of the sun on the water
-- Animation of clouds
-- Animated waves
-- Animated objects (ships, birds, sailboats)
-- Sound effects of water and maybe wind
+- Cloud colors- brightness depending on sun position, shadows, shadow response to sun position
 - Color response to clouds
-- Trees with or without islands
 - Possible options for colors (e.g. realistic vs vivid/idyllic colors)
+- Animated waves
+- Animation of clouds
+- Animated objects (ships, birds, sailboats, palm trees, dolphins)
+- Reflections
+- Better-looking sun behavior
+- Islands
+- Adjustability (amount of water waves, boats, wind effects)
+- Reflection of the sun on the water
+- Sound effects of water and maybe wind/seagulls
 - Possible wind response of objects
 
 
 ####Revision history:
+- 2-26-17
+  - Added clouds/cloud generator
+  - Added slider controls to set number of clouds and sun's position in the sky above horizon.  Colors respond in real time, it looks great!
+  - Added algorithms to adjust colors of background (sky/water/sand) according to position of sun in sky
+  - Expanded screen size to include new controls
+  - This update is my first exposure to slider controls and lambda expressions.
+  - [Output image 1 (high sun, few clouds)](output_170226a.png)
+  - [Output image 2 (low sun, many clouds)](output_170226b.png)
 
 - 2-19-17
   - Created the program with gradient sky, water, sand areas and a setting sun.
+  - [Output image](output_170219.png)
