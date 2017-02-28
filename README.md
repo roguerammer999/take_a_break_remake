@@ -13,7 +13,8 @@ The original link can be found here: http://www.homestarrunner.com/take-a-break.
 - Cloud size and location is randomized.  Clouds near horizon are darker.
 - Slider controls can set height of sun above horizon, as well as number of clouds present.
 - Background colors (sky/water/sand) will change depending on height of sun.
-- [Output image](output_170219.png)
+- [Output image 1 (high sun, few clouds)](output_170226a.png)
+- [Output image 2 (low sun, many clouds)](output_170226b.png)
 
 ####Upcoming changes:
 - Cloud colors- brightness depending on sun position, shadows, shadow response to sun position
