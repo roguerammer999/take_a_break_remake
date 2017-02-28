@@ -8,31 +8,38 @@ One time, a character watches a simulated beach sunset, complete with waves and 
 
 The original link can be found here: http://www.homestarrunner.com/take-a-break.exe
 
-####Current features (2-26-17):
+####Current features (2-28-17):
 - Sunset simulation using gradients to depict sky, water, and sand; also has a sun and clouds.
-- Cloud size and location is randomized.  Clouds near horizon are darker.
+- Cloud size and location is randomized within some constraints.
+- Cloud color depends on position of sun and height of cloud.  A lower sun also makes the top color of a two-color gradient more dominant, resulting in dark clouds with a bright sliver on the bottom.
 - Slider controls can set height of sun above horizon, as well as number of clouds present.
 - Background colors (sky/water/sand) will change depending on height of sun.
-- [Output image 1 (high sun, few clouds)](output_170226a.png)
-- [Output image 2 (low sun, many clouds)](output_170226b.png)
+- [Output image 1 (high sun)](output_170228a.png)
+- [Output image 2 (low sun, this one looks very nice)](output_170228b.png)
 
 ####Upcoming changes:
-- Cloud colors- brightness depending on sun position, shadows, shadow response to sun position
 - Color response to clouds
 - Possible options for colors (e.g. realistic vs vivid/idyllic colors)
 - Animated waves
 - Animation of clouds
 - Animated objects (ships, birds, sailboats, palm trees, dolphins)
 - Reflections
+- Reflection of the sun on the water
 - Better-looking sun behavior
 - Islands
 - Adjustability (amount of water waves, boats, wind effects)
-- Reflection of the sun on the water
 - Sound effects of water and maybe wind/seagulls
 - Possible wind response of objects
 
 
 ####Revision history:
+- 2-28-17
+  - Stopped clouds from regenerating size/location when changing sun position.  Clouds now stay stationary.
+  - Set cloud gradient colors to respond to sun position and height of cloud.  Gradient becomes more top-color dominant when the sun is low.
+  - Allowed sun and corona to grow/shrink depending on position of sky.  The corona also changes color near the horizon.
+- [Output image 1 (high sun)](output_170228a.png)
+- [Output image 2 (low sun, this one looks very nice with the cloud glimmer)](output_170228b.png)
+
 - 2-26-17
   - Added clouds/cloud generator
   - Added slider controls to set number of clouds and sun's position in the sky above horizon.  Colors respond in real time, it looks great!
