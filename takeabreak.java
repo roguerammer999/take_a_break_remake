@@ -11,12 +11,20 @@ public class takeabreak extends JFrame
     }
     
     private static JSlider cloudControl;
+    private static JSpinner cloudControlSp;
     private static JSlider sunControl;
+    private static JSpinner sunControlSp;
     private static int cloudCount = 6;
     private static ArrayList allClouds = new ArrayList(25);
+    private static int sunHeightRaw = 35;
     private static int sunHeight;
+    private static float sunVerticalCenter;
+    private static boolean skyIsDark = false;
     tbBackground mainBG;
     
+    Shape sky = new Rectangle2D.Float(0,0,1280,390);
+    Shape water = new Rectangle2D.Float(0,390,1280,250);
+    Shape sand = new Rectangle2D.Float(0,620,1280,180);
     
     public takeabreak()
     {
@@ -30,9 +38,8 @@ public class takeabreak extends JFrame
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         mainBG = new tbBackground();
-        
         this.add(controls(), BorderLayout.SOUTH);
-        createClouds();
+        allClouds = Takeabreak_Clouds.createClouds(cloudCount);
         this.add(mainBG, BorderLayout.CENTER);
         
         this.setVisible(true);
@@ -44,28 +51,24 @@ public class takeabreak extends JFrame
     {
         public void paint(Graphics inputGr)
         {
-            sunHeight = (int) (3.6 * (sunControl.getValue()));
             Graphics2D baseGraphics = (Graphics2D)inputGr;
-                        
+            baseGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+            sunHeight = (int)(3.6 * sunHeightRaw);
             
             //The sun is bigger when higher in the sky.
-            //The part of the sun diameter formula that multiplies by 2
-            //and divides by 12 is to ensure the diameter is always
-            //an even integer.
-            int sunDiameter = 60 + ( 2 * (int)(sunHeight)/12 );
+            float sunDiameter = 60 + sunHeight/6;
             Shape sun = new Ellipse2D.Float(
                     (640-(sunDiameter/2)),
                     390 - (sunDiameter/2) - sunHeight,
                     sunDiameter, sunDiameter);
+            sunVerticalCenter = 360 - sunHeight + (sunDiameter/2);
             
             //These three gradients/shapes correspond to the sky, water,
             //and sand respectively.
             GradientPaint skyGrad = (setSkyColors());
-            Shape sky = new Rectangle2D.Float(0,0,1280,390);
             GradientPaint waterGrad = (setWaterColors());
-            Shape water = new Rectangle2D.Float(0,390,1280,250);
             GradientPaint sandGrad = (setSandColors());
-            Shape sand = new Rectangle2D.Float(0,620,1280,180);
             
             //Drawing the sky (it will be covered by the sun)
             baseGraphics.setPaint(skyGrad);
@@ -88,8 +91,7 @@ public class takeabreak extends JFrame
             drawClouds(baseGraphics);
         }
         
-    }
-    
+    }    
     
     
     
@@ -101,6 +103,18 @@ public class takeabreak extends JFrame
     {
         JPanel tbControls = new JPanel();
         
+        JLabel sunLabel = new JLabel ("Height of sun");
+        sunControl = new JSlider(0,100,50);
+        sunControl.setMajorTickSpacing(20);
+        sunControl.setMinorTickSpacing(5);
+        sunControl.setPaintTicks(true);
+        sunControl.setPaintLabels(true);
+        sunControl.setSnapToTicks(false);
+        sunControl.addChangeListener(e -> sunSlideChange());
+        sunControlSp = new JSpinner(new SpinnerNumberModel
+                (sunControl.getValue(),0,100,1));
+        sunControlSp.addChangeListener(e -> sunSpinChange());
+        
         JLabel cloudLabel = new JLabel ("Number of clouds");
         cloudControl = new JSlider(0,25,cloudCount);
         cloudControl.setMajorTickSpacing(5);
@@ -109,48 +123,44 @@ public class takeabreak extends JFrame
         cloudControl.setPaintLabels(true);
         cloudControl.setSnapToTicks(true);
         cloudControl.addChangeListener(e ->cloudSlideChange());
-        
-        JLabel sunLabel = new JLabel ("Height of sun");
-        sunControl = new JSlider(0,100,50);
-        sunControl.setMajorTickSpacing(20);
-        sunControl.setMinorTickSpacing(5);
-        sunControl.setPaintTicks(true);
-        sunControl.setPaintLabels(true);
-        sunControl.setSnapToTicks(true);
-        sunControl.addChangeListener(e -> sunSlideChange());
+        cloudControlSp = new JSpinner(new SpinnerNumberModel
+        (cloudControl.getValue(),0,25,1));
+        cloudControlSp.addChangeListener(e -> cloudSpinChange());
         
         tbControls.add(sunLabel);
         tbControls.add(sunControl);
+        tbControls.add(sunControlSp);
         
         tbControls.add(cloudLabel);
         tbControls.add(cloudControl);
+        tbControls.add(cloudControlSp);
         return tbControls;
     }
     
     //This class will represent waves on the water.
     private class wave extends JComponent
     {
-        
     }
     
     //This class will represent ships on the water.
     private class ship extends JComponent
     {
-        
     }
-    
     
     
     //This method sets linear color changes for the gradient colors of the sky.
     //The "1" colors are the top color of the gradient, "2" are bottom.
     private static GradientPaint setSkyColors ()
     {
-        int red1 = 62 + (sunHeight/4);
-        int green1 = 140 + (sunHeight/6);
-        int blue1 = 210 + (sunHeight/10);
-        int red2 = 230 - (sunHeight/10);
-        int green2 = 136 + (sunHeight/4);
-        int blue2 = 51 + (sunHeight/2);
+        float sunIsDark = 1F;
+        if(skyIsDark == true)
+            sunIsDark = 0.92F;
+        int red1 = (int) (sunIsDark * (62 + (sunHeight/4)));
+        int green1 = (int) (sunIsDark * (140 + (sunHeight/6)));
+        int blue1 = (int) (sunIsDark * (210 + (sunHeight/10)));
+        int red2 = (int) (sunIsDark * (230 - (sunHeight/10)));
+        int green2 = (int) (sunIsDark * (136 + (sunHeight/4)));
+        int blue2 = (int) (sunIsDark * (51 + (sunHeight/2)));
         return new GradientPaint(0,0,new Color(red1,green1,blue1),
                 0,390,new Color(red2,green2,blue2));
     }
@@ -159,12 +169,15 @@ public class takeabreak extends JFrame
     //The "1" colors are the top color of the gradient, "2" are bottom.
     private static GradientPaint setWaterColors ()
     {
-        int red1 = 15 + (sunHeight/8);
-        int green1 = 45 + (sunHeight/4);
-        int blue1 = 95 + (sunHeight/4);
-        int red2 = 40 + (int)(sunHeight/3.5);
-        int green2 = 90 + (sunHeight/3);
-        int blue2 = 175 - (sunHeight/10);
+        float sunIsDark = 1F;
+        if(skyIsDark == true)
+            sunIsDark = 0.92F;
+        int red1 = (int) (sunIsDark * (15 + (sunHeight/8)));
+        int green1 = (int) (sunIsDark * (45 + (sunHeight/4)));
+        int blue1 = (int) (sunIsDark * (95 + (sunHeight/4)));
+        int red2 = (int) (sunIsDark * (40 + (int)(sunHeight/3.5)));
+        int green2 = (int) (sunIsDark * (90 + (sunHeight/3)));
+        int blue2 = (int) (sunIsDark * (175 - (sunHeight/10)));
         return new GradientPaint(0,390,new Color(red1,green1,blue1),
                 0,640,new Color(red2,green2,blue2));
     }
@@ -172,56 +185,19 @@ public class takeabreak extends JFrame
     //This sets linear color changes for the sand color gradient.
     private static GradientPaint setSandColors ()
     {
-        int red1 = 173 + sunHeight/6;
-        int green1 = 106 + sunHeight/3;
-        int blue1 = 45 + sunHeight/3;
-        int red2 = 89 + sunHeight/3;
-        int green2 = 58 + (int)(sunHeight/2.5);
-        int blue2 = 27 + sunHeight/3;
+        float sunIsDark = 1F;
+        if(skyIsDark == true)
+            sunIsDark = 0.92F;
+        int red1 = (int) (sunIsDark * (173 + sunHeight/6));
+        int green1 = (int) (sunIsDark * (106 + sunHeight/3));
+        int blue1 = (int) (sunIsDark * (45 + sunHeight/3));
+        int red2 = (int) (sunIsDark * (89 + sunHeight/3));
+        int green2 = (int) (sunIsDark * (58 + (int)(sunHeight/2.5)));
+        int blue2 = (int) (sunIsDark * (27 + sunHeight/3));
         return new GradientPaint(0,640,new Color(red1,green1,blue1),
                 0,800,new Color(red2,green2,blue2));
     }
     
-    
-    
-    //This class represents simple oval clouds in the air.  It defines
-    //dimensions and location, as well as two sets of RGB values for a gradient,
-    //one set for the top part of the cloud and one for the bottom.
-    private static int [] cloud ()
-    {
-        //Location/dimensions are semi-randomized.  The width is 175-230,
-        //and height is 2.7 to 6.7 times less.  Clouds near the horizon
-        //can have less width and can be flatter.
-        int xLRCorner = 185 + (int) (Math.random()*1095);
-        int yLRCorner = 30 + (int) (Math.random()*320);
-        int width = 70 + (int)
-                (Math.random() *
-                (185-(yLRCorner/5))
-                );
-        int height = (int)
-                (width /
-                (2.7 + (Math.random()*4) + (yLRCorner/150))
-                );
-
-        //With the size boundaries and lower right corners set,
-        //the upper left corner's coordinates are calculated.
-        int xULCorner = xLRCorner - width;
-        int yULCorner = yLRCorner - height;
-        
-        return new int [] {xULCorner, yULCorner, width, height};
-    }
-    
-    //The createClouds method redraws cloud locations.  If it is not used,
-    //cloud colors of existing shapes can be changed without draiwng new shapes.
-    private static void createClouds()
-    {
-        allClouds.clear();
-        for(int counter = 0; counter < cloudCount; counter++)
-        {
-            int [] cloudComponent = cloud();
-            allClouds.add(cloudComponent);
-        }
-    }
     
     
     //This draws the sun's corona based on the height of the sun.  A higher sun
@@ -258,6 +234,7 @@ public class takeabreak extends JFrame
     private static void drawClouds(Graphics inputGr)
     {
         Graphics2D cloudDraw = (Graphics2D) inputGr;
+        boolean skyIsDarkInner = false;
         for(int counter = 0; counter < cloudCount; counter++)
         {
             int [] newCloud = (int []) allClouds.get(counter);
@@ -274,7 +251,7 @@ public class takeabreak extends JFrame
             int topG = (int) (100 - (yHt/10) + (sunHeight * 150/360));
             int topB = (int) (120 - (yHt/12) + (sunHeight * 130/360));
             int bottomR = (int) (225 + (yHt/12) - (sunHeight / 30));
-            int bottomG = (int) (210 + (yHt/10) - (sunHeight / 30));
+            int bottomG = (int) (220 + (yHt/10) - (sunHeight / 30));
             int bottomB = (int) (145 + (yHt/12) + (sunHeight / 5));
 
 
@@ -291,20 +268,53 @@ public class takeabreak extends JFrame
                 newCloud[0],
                     newCloud[1] + newCloud[3],
                     new Color(bottomR,bottomG,bottomB)));
+            if(ovalCloud.contains(640D,(double)sunVerticalCenter))
+            {
+                cloudDraw.setComposite(
+                        AlphaComposite.getInstance(
+                                AlphaComposite.SRC_OVER, 0.6F));
+                skyIsDarkInner = true;
+            }
+            else
+                {
+                cloudDraw.setComposite(
+                        AlphaComposite.getInstance(
+                                AlphaComposite.SRC_OVER, 1F));
+            }
             cloudDraw.fill(ovalCloud);
         }
+        if(skyIsDarkInner == true)
+            skyIsDark = true;
+        else
+            skyIsDark = false;
     }
     
     private void cloudSlideChange ()
     {
         cloudCount = cloudControl.getValue();
-        createClouds();
+        cloudControlSp.setValue(cloudCount);
+        allClouds = Takeabreak_Clouds.createClouds(cloudCount);
         mainBG.repaint();
     }
     
     private void sunSlideChange ()
     {
-        sunHeight = sunControl.getValue();
+        sunHeightRaw = sunControl.getValue();
+        sunControlSp.setValue(sunHeightRaw);
+        mainBG.repaint();
+    }
+    
+    private void cloudSpinChange ()
+    {
+        cloudCount = (int)cloudControlSp.getValue();
+        cloudControl.setValue(cloudCount);
+        mainBG.repaint();
+    }
+    
+    private void sunSpinChange ()
+    {
+        sunHeightRaw = (int)sunControlSp.getValue();
+        sunControl.setValue(sunHeightRaw);
         mainBG.repaint();
     }
 }
