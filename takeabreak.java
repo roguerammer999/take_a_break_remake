@@ -19,13 +19,23 @@ public class takeabreak extends JFrame
     private static int sunHeightRaw = 35;
     private static int sunHeight;
     private static float sunVerticalCenter;
+    private static float sunDiameter;
     private static boolean skyIsDark = false;
+    private static boolean surfActive = false;
+    private static float surfHeight = 0F;
+    private static float surfHeightActual;
+    private static boolean surfOut = false;
+    private static final float SURFHEIGHTMAX = 40;
+    private static float [] sandTopColor;
+    private static float sandDarkening = 0.6F;
     tbBackground mainBG;
     
     Shape sky = new Rectangle2D.Float(0,0,1280,390);
-    Shape water = new Rectangle2D.Float(0,390,1280,250);
+    Shape water = new Rectangle2D.Float(0,390,1280,230);
     Shape sand = new Rectangle2D.Float(0,620,1280,180);
     
+    private static wave [] allWaves = new wave []
+    {new wave(1), new wave (6), new wave (30), new wave (100), new wave (220)};
     public takeabreak()
     {
         //The strange numbers for the size are based around
@@ -42,13 +52,25 @@ public class takeabreak extends JFrame
         allClouds = Takeabreak_Clouds.createClouds(cloudCount);
         this.add(mainBG, BorderLayout.CENTER);
         
+        Timer reloader = new Timer (50, e ->
+        {
+            this.repaint();
+            for (wave wavesCount:allWaves)
+            {
+                wavesCount.towardShore();
+                waveSurf.continueSurf();
+            }
+        }
+        );
+        reloader.start();
+        
         this.setVisible(true);
     }
     
     
     //This class represents the background.
     private class tbBackground extends JComponent
-    {
+    {        
         public void paint(Graphics inputGr)
         {
             Graphics2D baseGraphics = (Graphics2D)inputGr;
@@ -57,7 +79,7 @@ public class takeabreak extends JFrame
             sunHeight = (int)(3.6 * sunHeightRaw);
             
             //The sun is bigger when higher in the sky.
-            float sunDiameter = 60 + sunHeight/6;
+            sunDiameter = 60 + sunHeight/6;
             Shape sun = new Ellipse2D.Float(
                     (640-(sunDiameter/2)),
                     390 - (sunDiameter/2) - sunHeight,
@@ -89,9 +111,11 @@ public class takeabreak extends JFrame
             baseGraphics.fill(sand);
             
             drawClouds(baseGraphics);
+            drawWaves(baseGraphics);
+            drawSurf(baseGraphics);
         }
         
-    }    
+    }
     
     
     
@@ -137,9 +161,151 @@ public class takeabreak extends JFrame
         return tbControls;
     }
     
-    //This class will represent waves on the water.
-    private class wave extends JComponent
+    //This class represents waves on the water.  It begins a wave with
+    //an input of "inputHt", which is how many pixels down from the horizon
+    //the wave starts.  This program has 230 pixels of water in height.
+    //The "towardShore" method is called by the timer 20x a second
+    //and gradually advances the wave toward the shore (i.e. 230)
+    private static class wave extends JComponent
     {
+        public wave(float inputHt)
+        {
+            waveHeight = inputHt;
+            waveThickness = 1 + (waveHeight/20);
+        }
+        float waveHeight;
+        float waveThickness;
+        public void towardShore()
+        {
+            waveHeight = waveHeight * 1.02F;
+            waveThickness = 1 + (waveHeight/20);
+            if(waveHeight>=(230-waveThickness))
+            {
+                waveHeight = 1;
+                waveThickness = 1.5F;
+                surfActive = true;
+                sandDarkening = 0.6F;
+                surfHeight = surfHeightActual;
+            }
+        }
+    }
+    
+    //This draws all of the active waves, which are stored in waveCounter[].
+    private static void drawWaves(Graphics inputGr)
+    {
+        Graphics2D waveDraw = (Graphics2D) inputGr;
+        waveDraw.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        
+        for (wave waveCounter:allWaves)
+        {
+            Shape wave1 = new Rectangle2D.Float(0,390 + waveCounter.waveHeight,
+                            1280, waveCounter.waveThickness);
+            //This is essentially a randomizer.  If the decimal of the wave
+            //thickness is less than 0.3, it becomes slightly lighter.
+            //The purpose of this is to make the waves "sparkle" a little bit.
+            if(waveCounter.waveThickness - (int)waveCounter.waveThickness < 0.3)
+                waveDraw.setPaint(new Color(
+                        (int)(30+190*((float)sunHeight/360)),
+                        (int)(50+195*((float)sunHeight/360)),
+                        (int)(70+185*((float)sunHeight/360))
+                                ));
+            else
+                waveDraw.setPaint(new Color(
+                        (int)(30+180*((float)sunHeight/360)),
+                        (int)(50+185*((float)sunHeight/360)),
+                        (int)(70+175*((float)sunHeight/360))
+                ));
+            waveDraw.fill(wave1);
+        }
+    }
+    
+    private static class waveSurf
+    {
+        //This method calculates the position/dimensions of the surf.
+        //The surf is supposed to start fast, slow down as it approaches
+        //its maximum distance ("SURFHEIGHTMAX"), then pull away slowly
+        //and then speed up.  This might not be the best way to do it.
+        //"surfHeight" is a raw number that shows the progress of the surf.
+        //As it approaches the max, it is the size of the surf.  It will
+        //eventually exceed the max and basically represents how far into
+        //receding the surf currently is.  "surfHeightActual" is the dimension
+        //of the surf.
+        public static void continueSurf()
+        {
+            if(surfActive)
+            {
+                if(surfHeight >= 2 * SURFHEIGHTMAX)
+                {
+                    surfHeight = 0F;
+                    surfActive = false;
+                }
+                else if(surfHeight>=SURFHEIGHTMAX)
+                {
+                    surfHeight = surfHeight +
+                            ((surfHeight-SURFHEIGHTMAX)/SURFHEIGHTMAX) + 0.1F;
+                    surfHeightActual = (2*SURFHEIGHTMAX) - surfHeight;
+                    surfOut = true;
+                }
+                else if(surfHeight<SURFHEIGHTMAX)
+                {
+                    surfHeight = surfHeight +
+                            ((SURFHEIGHTMAX-surfHeight)/SURFHEIGHTMAX) + 0.1F;
+                    surfHeightActual = surfHeight;
+                }
+            }
+        }
+    }
+    
+    private static void drawSurf(Graphics inputGr)
+    {
+        Graphics2D surfDraw = (Graphics2D) inputGr;
+        surfDraw.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        if(surfActive)
+        {
+            Shape surf1 = new Rectangle2D.Float(0,620,1280,surfHeightActual);
+            surfDraw.setPaint(new Color(
+                    180 + (int)(75 * ((float)sunHeight)/360),
+                    180 + (int)(75 * ((float)sunHeight)/360),
+                    180 + (int)(75 * ((float)sunHeight)/360)
+            ));
+            surfDraw.setComposite(AlphaComposite.getInstance
+                (AlphaComposite.SRC_OVER,
+                        1-(surfHeight/(2*SURFHEIGHTMAX + 2))
+                ));
+            surfDraw.fill(surf1);
+        }
+        //The "else" clause (i.e. if !surfActive) starts to lighten the
+        //sand after the surf itself has fully receded.  A sandDarkening
+        //of 1 means that the sand is not darkened.
+        else
+        {
+            sandDarkening = sandDarkening + (1-sandDarkening)/20 + 0.01F;
+            if(sandDarkening > 1)
+            {
+                sandDarkening = 1;
+                surfOut = false;
+            }
+        }
+        //"surfOut" means that the surf is past its apex and is receding.
+        //This clause starts drawing the wet/dark sand when surf is receding.
+        if (surfOut)
+        {
+            Shape wetSand = new Rectangle2D.Float(
+                    0, 620 + surfHeightActual,
+                    1280,
+                    (SURFHEIGHTMAX-surfHeightActual) * 2.5F * (1-sandDarkening)
+            );
+            surfDraw.setPaint(new Color (
+                    (int)(sandTopColor[0] * sandDarkening),
+                    (int)(sandTopColor[1] * sandDarkening),
+                    (int)(sandTopColor[2] * sandDarkening)
+            ));
+            surfDraw.setComposite(AlphaComposite.getInstance
+                (AlphaComposite.SRC_OVER, 1));
+            surfDraw.fill(wetSand);
+        }
     }
     
     //This class will represent ships on the water.
@@ -191,6 +357,7 @@ public class takeabreak extends JFrame
         int red1 = (int) (sunIsDark * (173 + sunHeight/6));
         int green1 = (int) (sunIsDark * (106 + sunHeight/3));
         int blue1 = (int) (sunIsDark * (45 + sunHeight/3));
+        sandTopColor = new float [] {red1, green1, blue1};
         int red2 = (int) (sunIsDark * (89 + sunHeight/3));
         int green2 = (int) (sunIsDark * (58 + (int)(sunHeight/2.5)));
         int blue2 = (int) (sunIsDark * (27 + sunHeight/3));
@@ -206,6 +373,8 @@ public class takeabreak extends JFrame
     private static void drawCorona(Graphics inputGr)
     {
         Graphics2D coroGraphics = (Graphics2D) inputGr;
+        coroGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
         //The part of the corona diameter formula that multiplies by 2
         //and divides by 12 is to ensure the diameter is always an even integer.
         int coronaDiam = 100 + ( 2 * (int)(sunHeight-30)/12 );
@@ -234,6 +403,8 @@ public class takeabreak extends JFrame
     private static void drawClouds(Graphics inputGr)
     {
         Graphics2D cloudDraw = (Graphics2D) inputGr;
+        cloudDraw.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
         boolean skyIsDarkInner = false;
         for(int counter = 0; counter < cloudCount; counter++)
         {
@@ -283,7 +454,7 @@ public class takeabreak extends JFrame
             }
             cloudDraw.fill(ovalCloud);
         }
-        if(skyIsDarkInner == true)
+        if(skyIsDarkInner)
             skyIsDark = true;
         else
             skyIsDark = false;
