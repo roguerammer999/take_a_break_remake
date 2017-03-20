@@ -35,6 +35,7 @@ The original link can be found here: http://www.homestarrunner.com/take-a-break.
   - Added animated waves.  They change color depending on the height of the sun.
   - Added animated surf/bubbles.
   - Added animated wet sand that dries out after the surf recedes.
+  - [Output image (not animated)](output_170319.png)
 
 - 3-08-17
   - Moved two methods to a different class to make code more workable.
