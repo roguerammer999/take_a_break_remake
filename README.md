@@ -8,17 +8,17 @@ One time, a character watches [a simulated beach sunset called "take-a-break"](h
 
 The original link can be found here: http://www.homestarrunner.com/take-a-break.exe
 
-####Current features (3-08-17):
+#### Current features (3-19-17):
 - Sunset simulation using gradients to depict sky, water, and sand; also has a sun and clouds.
 - Cloud size and location is randomized within some constraints.  Clouds that pass in front of the sun become somewhat transparent.
 - Cloud color depends on position of sun and height of cloud.  A lower sun also makes the top color of a two-color gradient more dominant, resulting in dark clouds with a bright sliver on the bottom.
 - Slider and spinner controls can set height of sun above horizon, as well as number of clouds present.
 - Background colors (sky/water/sand) will change depending on height of sun.  They also darken if the sun passes behind clouds.
-- [Output image- shows different sky colors with sun at same height due to cloud cover](output_170308.png)
+- Simple animated waves that move from the horizon toward the sand, then break into white surf that fades and leaves wet sand that also fades.
+- [Output image (not animated)](output_170319.png)
 
-####Upcoming changes:
+#### Upcoming changes:
 - Possible options for colors (e.g. realistic vs vivid/idyllic colors)
-- Animated waves
 - Animation of clouds
 - Animated objects (ships, birds, sailboats, palm trees, dolphins)
 - Reflections
@@ -30,7 +30,12 @@ The original link can be found here: http://www.homestarrunner.com/take-a-break.
 - Possible wind response of objects
 
 
-####Revision history:
+#### Revision history:
+- 3-19-17
+  - Added animated waves.  They change color depending on the height of the sun.
+  - Added animated surf/bubbles.
+  - Added animated wet sand that dries out after the surf recedes.
+
 - 3-08-17
   - Moved two methods to a different class to make code more workable.
   - Set clouds to turn transparent when passing in front of sun; this also causes the background colors to darken slightly.
